@@ -64,14 +64,35 @@ where C1.pid=C2.pid AND C1.cost>C2.cost AND C1.sid<>C2.sid;
 
 -- 1. Find the pnames of parts for which there is some supplier
 select distinct parts.pname
-from Supplier, parts, catalog
-where Supplier.sid = catalog.sid AND parts.pid = catalog.pid;
+from parts, catalog
+where parts.pid = catalog.pid;
 
 -- ii. Find the snames of suppliers who supply every part.
-select sname, count(*)
-from Supplier, catalog
-group by(sid)
-having count(*) = 2;
+select S.sname
+from Supplier S
+where S.sid = ANY (
+	select sid
+    from Catalog
+    group by sid
+    having count(sid) = (
+			select count(*)
+            from parts
+		)
+);
+
+-- iii.Find the snames of suppliers who supply every red part.
+
+
+-- iv. Find the pnames of parts supplied by Acme Widget Suppliers and by no one else.
+
+
+-- v. Find the sids of suppliers who charge more for some part than the average cost of that part (averaged over all the suppliers who supply that part)
+SELECT DISTINCT C.sid FROM Catalog C
+ WHERE C.cost > ( SELECT AVG (C1.cost)
+ FROM Catalog C1
+ WHERE C1.pid = C.pid );
+
+
 -- iii. Find the snames of suppliers who supply every red part.
 -- iv. Find the pnames of parts supplied by Acme Widget Suppliers and by no one else.
 -- v. Find the sids of suppliers who charge more for some part than the average cost of that part (averaged over 
